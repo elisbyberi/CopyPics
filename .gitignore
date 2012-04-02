@@ -1,0 +1,10 @@
+# Do not track build objects.
+build*/*
+!build*/.gitignore
+
+# Do not track picmover executable in exe/
+exe/picmover
+
+# Do not track emacs temporary and backup files
+\#*#
+*~
