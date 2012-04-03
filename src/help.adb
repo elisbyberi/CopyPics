@@ -24,6 +24,7 @@
 with Ada.Text_IO;
 
 package body Help is
+
    use Ada.Text_IO;
 
    -------------
@@ -42,4 +43,5 @@ package body Help is
       Put_Line ("each JPEG file found in the source directory.");
       Put_Line ("Source and target directory must not be the same.");
    end Print;
+
 end Help;

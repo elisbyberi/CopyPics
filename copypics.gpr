@@ -1,8 +1,8 @@
 -------------------------------------------------------------------------------
 --                                                                           --
---                               picmover                                    --
+--                               CopyPics                                    --
 --                                                                           --
---                           Picmover Project File                              --
+--                          CopyPics Project File                            --
 --                                                                           --
 --                      Copyright (C) 2012-, Thomas Løcke                    --
 --                                                                           --
@@ -19,14 +19,14 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
-project Picmover is
+project CopyPics is
    type Build_Type is ("Debug", "Production");
    Build : Build_Type := External ("BUILDTYPE", "Production");
 
    Source_Options := ("src");
    for Source_Dirs use Source_Options;
 
-   for Main use ("picmover.adb");
+   for Main use ("copypics.adb");
 
    for Exec_Dir use "exe";
 
@@ -63,4 +63,4 @@ project Picmover is
 
       end case;
    end Compiler;
-end Picmover;
+end CopyPics;

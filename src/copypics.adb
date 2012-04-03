@@ -1,6 +1,6 @@
 -------------------------------------------------------------------------------
 --                                                                           --
---                                Picmover                                   --
+--                                CopyPics                                   --
 --                                                                           --
 --                      Copyright (C) 2012-, Thomas Løcke                    --
 --                                                                           --
@@ -19,14 +19,17 @@
 
 with Ada.Command_Line;
 with Ada.Directories;
-with Ada.Text_IO;
+with Ada.Strings.Fixed;
+with Ada.Strings.Maps.Constants;
+--  with Ada.Text_IO;
 with Help;
 with Utilities;
 
-procedure Picmover is
+procedure CopyPics is
+
    use Ada.Command_Line;
    use Ada.Directories;
-   use Ada.Text_IO;
+   --  use Ada.Text_IO;
    use Utilities;
 
    procedure Copy_JPEG_Files
@@ -35,14 +38,6 @@ procedure Picmover is
    --  yyyy-mm-dd in target directory. Creates the target yyyy-mm-dd directory
    --  if it doesn't exist.
 
-   function Valid_Path
-     (Path : in String)
-      return Boolean;
-   --  Check if the given Path is valid, ie.:
-   --      1. Exists
-   --      2. Is a directory
-   --      3. Contains 1 or more jpg/jpeg files
-
    -----------------------
    --  Copy_JPEG_Files  --
    -----------------------
@@ -50,39 +45,43 @@ procedure Picmover is
    procedure Copy_JPEG_Files
      (Search_Item : in Directory_Entry_Type)
    is
-      Dir_Name : constant String :=
-                   To_String (Modification_Time (Search_Item));
-   begin
-      Put_Line (Simple_Name (Search_Item));
-      Put_Line (Dir_Name);
-   end Copy_JPEG_Files;
+      use Ada.Strings.Fixed;
+      use Ada.Strings.Maps.Constants;
 
-   ------------------
-   --  Valid_Path  --
-   ------------------
-
-   function Valid_Path
-     (Path : in String)
-      return Boolean
-   is
+      Dir_Name  : constant String :=
+                    To_String (Modification_Time (Search_Item));
+      File_Name : constant String := Simple_Name (Search_Item);
+      File_Ext  : constant String := Translate (Extension (File_Name),
+                                                Lower_Case_Map);
+      Target_Dir : constant String := Add_Slash (Argument (2)) & Dir_Name;
    begin
-      if Exists (Path)
-        and then Kind (Name => Path) = Directory
-      then
-         return True;
+      --  First we check if this is indeed a valid JPEG file. This is done by
+      --  checking the filename for either .jpg or .jpeg. We do not care about
+      --  case.
+      if File_Ext = "jpg" or File_Ext = "jpeg" then
+         --  Check if the target folder yyyy-mm-dd exists and create it if it
+         --  doesn't.
+         if not Exists (Target_Dir) then
+            Create_Directory (Target_Dir);
+         end if;
+
+         --  Copy the file.
+         Copy_File (Full_Name (Search_Item), Compose (Target_Dir, File_Name));
       end if;
-
-      return False;
-   end Valid_Path;
+   end Copy_JPEG_Files;
 
    Filter : constant Filter_Type := (Ordinary_File => True,
                                      Special_File  => False,
                                      Directory     => False);
    Print_Help : Boolean := False;
 begin
-   if Argument_Count = 0 or Argument_Count > 2 then
-      --  Bad arguments given, print help.
+   --  If we've got bad arguments, then print help.
+   if Argument_Count /= 2 then
       Print_Help := True;
+   else
+      if Add_Slash (Argument (1)) = Add_Slash (Argument (2)) then
+         Print_Help := True;
+      end if;
    end if;
 
    Verify_Arguments :
@@ -95,10 +94,6 @@ begin
             Print_Help := True;
             exit Verify_Arguments;
          end if;
-
-         if Argument (1) = Argument (2) then
-            Print_Help := True;
-         end if;
       end if;
    end loop Verify_Arguments;
 
@@ -110,4 +105,5 @@ begin
               Filter    => Filter,
               Process   => Copy_JPEG_Files'Access);
    end if;
-end Picmover;
+
+end CopyPics;

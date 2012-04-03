@@ -25,9 +25,21 @@ with Ada.Calendar;
 
 package Utilities is
 
+   function Add_Slash
+     (Path : in String)
+      return String;
+   --  Postfix a forward slash to Path if it is missing.
+
    function To_String
      (Stamp : Ada.Calendar.Time)
       return String;
    --  Return a yyyy-mm-dd formatted string based on Stamp.
+
+   function Valid_Path
+     (Path : in String)
+      return Boolean;
+   --  Check if the given Path is valid, ie.:
+   --      1. Exists
+   --      2. Is a directory
 
 end Utilities;

@@ -21,7 +21,27 @@
 --                                                                           --
 -------------------------------------------------------------------------------
 
+with Ada.Calendar.Formatting;
+with Ada.Directories;
+
 package body Utilities is
+
+   -----------------
+   --  Add_Slash  --
+   -----------------
+
+   function Add_Slash
+     (Path : in String)
+      return String
+   is
+   begin
+      if Path (Path'Last) /= '/' then
+         return Path & "/";
+      end if;
+
+      return Path;
+   end Add_Slash;
+
    -----------------
    --  To_String  --
    -----------------
@@ -32,11 +52,28 @@ package body Utilities is
    is
       use Ada.Calendar;
 
-      Y : constant String := Year_Number'Image (Year (Stamp));
-      M : constant String := Month_Number'Image (Month (Stamp));
-      D : constant String := Day_Number'Image (Day (Stamp));
+      S : constant String := Formatting.Image (Stamp);
    begin
-      --      return Formatting.Image (Stamp);
-      return Y (Y'First + 1 .. Y'Last) & M & D;
+      return S (1 .. 10);
    end To_String;
+
+   ------------------
+   --  Valid_Path  --
+   ------------------
+
+   function Valid_Path
+     (Path : in String)
+      return Boolean
+   is
+      use Ada.Directories;
+   begin
+      if Exists (Path)
+        and then Kind (Name => Path) = Directory
+      then
+         return True;
+      end if;
+
+      return False;
+   end Valid_Path;
+
 end Utilities;
