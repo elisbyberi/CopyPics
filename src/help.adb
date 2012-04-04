@@ -1,6 +1,6 @@
 -------------------------------------------------------------------------------
 --                                                                           --
---                                Picmover                                   --
+--                                CopyPics                                   --
 --                                                                           --
 --                                  Help                                     --
 --                                                                           --
@@ -34,14 +34,19 @@ package body Help is
    procedure Print
    is
    begin
-      Put_Line ("Usage: picmover /path/to/source/dir /path/to/target/dir");
-      Put_Line ("       picmover -h | --help for this text.");
+      Put_Line ("Usage: copypics [options] SOURCE TARGET");
+      Put_Line ("Options:");
+      Put_Line ("    -h | --help for this text.");
+      Put_Line ("    -d | --delete to delete source files after copying.");
+      Put_Line ("Example:");
+      Put_Line ("    copypics -d /source/dir/ /target/dir/");
       New_Line;
-      Put_Line ("Moves JPEG files from source directory to target directory.");
-      Put_Line ("Directories named yyyy-mm-dd are created and populated in");
-      Put_Line ("the target directory according to the modification time of");
-      Put_Line ("each JPEG file found in the source directory.");
-      Put_Line ("Source and target directory must not be the same.");
+      Put_Line ("CopyPics copies JPEG/RAW files from the given SOURCE");
+      Put_Line ("directory to the given TARGET directory. Directories named");
+      Put_Line ("yyyy-mm-dd are created and populated in the TARGET");
+      Put_Line ("directory according to the modification time of each file");
+      Put_Line ("found in the SOURCE directory. The SOURCE and TARGET");
+      Put_Line ("directory must not be the same.");
    end Print;
 
 end Help;

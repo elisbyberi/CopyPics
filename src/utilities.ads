@@ -1,6 +1,6 @@
 -------------------------------------------------------------------------------
 --                                                                           --
---                                Picmover                                   --
+--                                CopyPics                                   --
 --                                                                           --
 --                                Utilities                                  --
 --                                                                           --
@@ -28,7 +28,7 @@ package Utilities is
    function Add_Slash
      (Path : in String)
       return String;
-   --  Postfix a forward slash to Path if it is missing.
+   --  Postfix a forward slash to Path, if it is missing.
 
    function To_String
      (Stamp : Ada.Calendar.Time)

@@ -1,6 +1,6 @@
 -------------------------------------------------------------------------------
 --                                                                           --
---                                Picmover                                   --
+--                                CopyPics                                   --
 --                                                                           --
 --                                  Help                                     --
 --                                                                           --
@@ -24,6 +24,6 @@
 package Help is
 
    procedure Print;
-   --  Print the Picmover help text.
+   --  Print the CopyPics help text.
 
 end Help;

@@ -21,7 +21,8 @@ with Ada.Command_Line;
 with Ada.Directories;
 with Ada.Strings.Fixed;
 with Ada.Strings.Maps.Constants;
---  with Ada.Text_IO;
+with Ada.Strings.Unbounded;
+with Ada.Text_IO;
 with Help;
 with Utilities;
 
@@ -29,14 +30,32 @@ procedure CopyPics is
 
    use Ada.Command_Line;
    use Ada.Directories;
-   --  use Ada.Text_IO;
+   use Ada.Strings.Unbounded;
+   use Ada.Text_IO;
    use Utilities;
+
+   type CLI_Args is
+      record
+         Delete_Source_Files : Boolean := False;
+         Print_Help          : Boolean := False;
+         Source_Dir          : Unbounded_String := Null_Unbounded_String;
+         Target_Dir          : Unbounded_String := Null_Unbounded_String;
+      end record;
+
+   Args         : CLI_Args;
+   Copy_Counter : Natural := 0;
+   Del_Counter  : Natural := 0;
+   Filter       : constant Filter_Type := (Ordinary_File => True,
+                                           Special_File  => False,
+                                           Directory     => False);
 
    procedure Copy_JPEG_Files
      (Search_Item : in Directory_Entry_Type);
-   --  Copy JPEG files found in the source directory to a directory named
+   --  Copy JPEG/RAW files found in the source directory to a directory named
    --  yyyy-mm-dd in target directory. Creates the target yyyy-mm-dd directory
    --  if it doesn't exist.
+   --  Deletes the source file if the -d / --delete commandline parameter is
+   --  given.
 
    -----------------------
    --  Copy_JPEG_Files  --
@@ -53,12 +72,15 @@ procedure CopyPics is
       File_Name : constant String := Simple_Name (Search_Item);
       File_Ext  : constant String := Translate (Extension (File_Name),
                                                 Lower_Case_Map);
-      Target_Dir : constant String := Add_Slash (Argument (2)) & Dir_Name;
+      Target_Dir : constant String := To_String (Args.Target_Dir) & Dir_Name;
    begin
-      --  First we check if this is indeed a valid JPEG file. This is done by
-      --  checking the filename for either .jpg or .jpeg. We do not care about
-      --  case.
-      if File_Ext = "jpg" or File_Ext = "jpeg" then
+      --  First we check if this is indeed a valid JPEG/RAW file. This is done
+      --  by checking the extension of the file. We do not care about case.
+      if File_Ext = "jpg"
+        or File_Ext = "jpeg"
+        or File_Ext = "raw"
+        or File_Ext = "arw"
+      then
          --  Check if the target folder yyyy-mm-dd exists and create it if it
          --  doesn't.
          if not Exists (Target_Dir) then
@@ -66,44 +88,85 @@ procedure CopyPics is
          end if;
 
          --  Copy the file.
-         Copy_File (Full_Name (Search_Item), Compose (Target_Dir, File_Name));
+         declare
+            Source : constant String := Full_Name (Search_Item);
+            Target : constant String := Compose (Target_Dir, File_Name);
+         begin
+            Put ("Copying " & File_Name & " to " & Target_Dir);
+            Copy_File (Source, Target, "preserve=timestamps");
+            if Exists (Target) then
+               Put (" - Success!");
+               Copy_Counter := Copy_Counter + 1;
+
+               if Args.Delete_Source_Files then
+                  --  Delete the file.
+                  Delete_File (Source);
+                  New_Line;
+                  if Exists (Source) then
+                     Put ("Could not delete " & Source);
+                  else
+                     Put ("Deleted " & Source);
+                     Del_Counter := Del_Counter + 1;
+                  end if;
+               end if;
+            else
+               Put (" - Failed!");
+            end if;
+            New_Line;
+         end;
       end if;
    end Copy_JPEG_Files;
-
-   Filter : constant Filter_Type := (Ordinary_File => True,
-                                     Special_File  => False,
-                                     Directory     => False);
-   Print_Help : Boolean := False;
 begin
    --  If we've got bad arguments, then print help.
-   if Argument_Count /= 2 then
-      Print_Help := True;
-   else
-      if Add_Slash (Argument (1)) = Add_Slash (Argument (2)) then
-         Print_Help := True;
-      end if;
+   if Argument_Count < 2 or Argument_Count > 3 then
+      Args.Print_Help := True;
    end if;
 
    Verify_Arguments :
    for k in 1 .. Argument_Count loop
       if Argument (k) = "-h" or Argument (k) = "--help" then
-         Print_Help := True;
+         Args.Print_Help := True;
          exit Verify_Arguments;
+      elsif Argument (k) = "-d" or Argument (k) = "--delete" then
+         Args.Delete_Source_Files := True;
       else
          if not Valid_Path (Path => Argument (k)) then
-            Print_Help := True;
+            Args.Print_Help := True;
             exit Verify_Arguments;
+         else
+            --  At this point we've got a valid path, so lets add it to our
+            --  Args object.
+            if Args.Source_Dir = Null_Unbounded_String then
+               Args.Source_Dir := To_Unbounded_String
+                 (Add_Slash (Argument (k)));
+            elsif Args.Target_Dir = Null_Unbounded_String then
+               Args.Target_Dir := To_Unbounded_String
+                 (Add_Slash (Argument (k)));
+            else
+               --  Source and target already set. One path too many!
+               Args.Print_Help := True;
+            end if;
          end if;
       end if;
    end loop Verify_Arguments;
 
-   if Print_Help then
+   if Args.Source_Dir = Args.Target_Dir then
+      Args.Print_Help := True;
+   end if;
+
+   if Args.Print_Help then
       Help.Print;
    else
-      Search (Directory => Argument (1),
+      Search (Directory => To_String (Args.Source_Dir),
               Pattern   => "",
               Filter    => Filter,
               Process   => Copy_JPEG_Files'Access);
+
+      if Copy_Counter > 0 then
+         New_Line;
+      end if;
+      Put_Line ("Copied" & Natural'Image (Copy_Counter) & " files");
+      Put_Line ("Deleted" & Natural'Image (Del_Counter) & " files");
    end if;
 
 end CopyPics;

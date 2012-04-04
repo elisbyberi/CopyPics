@@ -1,6 +1,6 @@
 -------------------------------------------------------------------------------
 --                                                                           --
---                                Picmover                                   --
+--                                CopyPics                                   --
 --                                                                           --
 --                                Utilities                                  --
 --                                                                           --
@@ -68,7 +68,7 @@ package body Utilities is
       use Ada.Directories;
    begin
       if Exists (Path)
-        and then Kind (Name => Path) = Directory
+        and then Kind (Path) = Directory
       then
          return True;
       end if;
