@@ -49,7 +49,7 @@ procedure CopyPics is
                                            Special_File  => False,
                                            Directory     => False);
 
-   procedure Copy_JPEG_Files
+   procedure Copy_Files
      (Search_Item : in Directory_Entry_Type);
    --  Copy JPEG/RAW files found in the source directory to a directory named
    --  yyyy-mm-dd in target directory. Creates the target yyyy-mm-dd directory
@@ -57,11 +57,11 @@ procedure CopyPics is
    --  Deletes the source file if the -d / --delete commandline parameter is
    --  given.
 
-   -----------------------
-   --  Copy_JPEG_Files  --
-   -----------------------
+   ------------------
+   --  Copy_Files  --
+   ------------------
 
-   procedure Copy_JPEG_Files
+   procedure Copy_Files
      (Search_Item : in Directory_Entry_Type)
    is
       use Ada.Strings.Fixed;
@@ -69,25 +69,23 @@ procedure CopyPics is
 
       Dir_Name  : constant String :=
                     To_String (Modification_Time (Search_Item));
+      --  The yyyy-mm-dd string.
+
       File_Name : constant String := Simple_Name (Search_Item);
       File_Ext  : constant String := Translate (Extension (File_Name),
                                                 Lower_Case_Map);
       Target_Dir : constant String := To_String (Args.Target_Dir) & Dir_Name;
    begin
-      --  First we check if this is indeed a valid JPEG/RAW file. This is done
-      --  by checking the extension of the file. We do not care about case.
       if File_Ext = "jpg"
         or File_Ext = "jpeg"
         or File_Ext = "raw"
         or File_Ext = "arw"
       then
-         --  Check if the target folder yyyy-mm-dd exists and create it if it
-         --  doesn't.
          if not Exists (Target_Dir) then
             Create_Directory (Target_Dir);
          end if;
 
-         --  Copy the file.
+         Handle_File :
          declare
             Source : constant String := Full_Name (Search_Item);
             Target : constant String := Compose (Target_Dir, File_Name);
@@ -99,7 +97,6 @@ procedure CopyPics is
                Copy_Counter := Copy_Counter + 1;
 
                if Args.Delete_Source_Files then
-                  --  Delete the file.
                   Delete_File (Source);
                   New_Line;
                   if Exists (Source) then
@@ -113,12 +110,12 @@ procedure CopyPics is
                Put (" - Failed!");
             end if;
             New_Line;
-         end;
+         end Handle_File;
       end if;
-   end Copy_JPEG_Files;
+   end Copy_Files;
 begin
-   --  If we've got bad arguments, then print help.
    if Argument_Count < 2 or Argument_Count > 3 then
+      --  Bad arguments. Print help.
       Args.Print_Help := True;
    end if;
 
@@ -160,7 +157,7 @@ begin
       Search (Directory => To_String (Args.Source_Dir),
               Pattern   => "",
               Filter    => Filter,
-              Process   => Copy_JPEG_Files'Access);
+              Process   => Copy_Files'Access);
 
       if Copy_Counter > 0 then
          New_Line;
