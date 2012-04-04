@@ -3,7 +3,7 @@ build*/*
 !build*/.gitignore
 
 # Do not track picmover executable in exe/
-exe/picmover
+exe/copypics
 
 # Do not track emacs temporary and backup files
 \#*#
