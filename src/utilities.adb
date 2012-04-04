@@ -23,6 +23,7 @@
 
 with Ada.Calendar.Formatting;
 with Ada.Directories;
+with Ada.Text_IO;
 
 package body Utilities is
 
@@ -66,6 +67,7 @@ package body Utilities is
       return Boolean
    is
       use Ada.Directories;
+      use Ada.Text_IO;
    begin
       if Exists (Path)
         and then Kind (Path) = Directory
@@ -73,6 +75,8 @@ package body Utilities is
          return True;
       end if;
 
+      Put_Line ("ERROR: " & Path & " is not valid.");
+      New_Line;
       return False;
    end Valid_Path;
 
