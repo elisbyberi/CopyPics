@@ -3,6 +3,15 @@ the source files to a directory named yyyy-mm-dd in the target directory. The
 yyyy-mm-dd directory is created based on the modification time of the file that
 is being copied. CopyPics can delete the source files, by using the -d option.
 
+Compiling and "installing" it is a simple matter of calling make:
+
+    1. $ make
+    2. cp exe/copypics /usr/local/bin/
+
+Start copypics without any options (or with the -h option) and you'll get a
+short usage example.
+
 This was originally a BASH script, but I felt like doing it in Ada, so I did.
+There are no gains from doing it in Ada, except I had some fun.
 
 Enjoy!
