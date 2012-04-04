@@ -1,1 +1,8 @@
-CopyPics README...
+CopyPics copies JPEG and RAW files from one directory to another. It copies
+the source files to a directory named yyyy-mm-dd in the target directory. The
+yyyy-mm-dd directory is created based on the modification time of the file that
+is being copied. CopyPics can delete the source files, by using the -d option.
+
+This was originally a BASH script, but I felt like doing it in Ada, so I did.
+
+Enjoy!
